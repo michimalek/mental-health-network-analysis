@@ -15,20 +15,28 @@ options.add_argument("--disable-extensions")
 options.add_experimental_option("detach", True)
 
 
+
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 driver.maximize_window()
 
 driver.get("https://www.mentalhealthforum.net/forum/forums/anxiety-forum.365/")
 
-threads = driver.find_element("xpath", "//div[contains(@class,'structItemContainer-group')]")
+thread_container = driver.find_element("xpath", "//div[contains(@class,'structItemContainer-group js-threadList')]")
+time.sleep(1)
+titles = thread_container.find_elements("xpath", ".//div[contains(@class, 'structItem-title')]")
+for title in titles:
+    link = title.find_element("xpath", ".//a[contains(@href, 'thread')]")
+    time.sleep(10)
+    link.click()
+    # print(link.get_attribute("href"))
+    
 
-link = threads.find_element("xpath", "//a[@href]")
 
 
+# print(link.get_attribute("href"))
+# time.sleep(2)
+# link.click()
 
-print(link.get_attribute("href"))
-time.sleep(2)
-link.click()
 # for thread in threads:
 #     thread.find_element(By.XPATH, "//a[@href]")
 # html = driver.page_source
