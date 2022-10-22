@@ -19,16 +19,32 @@ options.add_experimental_option("detach", True)
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 driver.maximize_window()
 
+users = []
+user_type = []
+user_msg = []
+user_messages_count = []
+user_location = []
+
+
 driver.get("https://www.mentalhealthforum.net/forum/forums/anxiety-forum.365/")
 
 thread_container = driver.find_element("xpath", "//div[contains(@class,'structItemContainer-group js-threadList')]")
-time.sleep(1)
 titles = thread_container.find_elements("xpath", ".//div[contains(@class, 'structItem-title')]")
+links = []
 for title in titles:
     link = title.find_element("xpath", ".//a[contains(@href, 'thread')]")
-    time.sleep(10)
-    link.click()
-    # print(link.get_attribute("href"))
+    links.append(link.get_attribute("href"))
+    # driver.execute_script("arguments[0].click();", link)
+    # time.sleep(15)
+for link in links:
+    driver.get(link)
+    soup = BeautifulSoup(driver.page_source,"html.parser")
+    name = driver.find_element("xpath", ".//span[contains(@class, 'username')]")
+    
+    time.sleep(1)
+
+
+
     
 
 
