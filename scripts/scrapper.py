@@ -26,56 +26,72 @@ users = []
 user_type = []
 user_msg = []
 user_msg_count = []
+forum_types = []
 
-inital_link = "https://www.mentalhealthforum.net/forum/forums/anxiety-forum.365/"
+inital_link = "https://www.mentalhealthforum.net/forum/"
 
 driver.get(inital_link)
 
-# Returns max page number of forum
-max_page_label = driver.find_elements("xpath", "//li[contains(@class,'pageNav-page')]")[-1]
-forum_max_page = max_page_label.find_element("xpath", ".//a[@href]").text
+forum_block = driver.find_element("xpath", "//div[@class='block block--category block--category401 collapsible-nodes']")
+forums = forum_block.find_elements("xpath", ".//div[contains(@class,'node node')]")
+
+print(len(forums))
+
+forum_links = [forum.find_element("xpath", ".//a[contains(@data-shortcut,'node-description')]").get_attribute("href") for forum in forums]
 
 
-for i in range(1, int(3), 1):
-    page_num = f"/page-{i}"
-    driver.get(inital_link + page_num)
-    # Returns all links of the page in a list called links
-    thread_container = driver.find_element("xpath", "//div[contains(@class,'structItemContainer-group js-threadList')]")
-    titles = thread_container.find_elements("xpath", ".//div[contains(@class, 'structItem-title')]")
-    links = []
-    for title in titles:
-        link = title.find_element("xpath", ".//a[contains(@href, 'thread')]")
-        links.append(link.get_attribute("href"))
-        # driver.execute_script("arguments[0].click();", link)
-        # time.sleep(15)
+for forum_link in forum_links[:3]:
 
-    # Opens each link and extracts data
-    for link in links:
-        driver.get(link)
-        articles = driver.find_elements("xpath", ".//article[@class='message message--post js-post js-inlineModContainer  ']")
-        for article in articles:
-            try:
-                users.append(article.find_element("xpath", ".//span[@class='username ' and @itemprop='name']").text)
-            except Exception:
-                users.append(None)
-            try:
-                user_type.append(article.find_element("xpath", ".//h5[@itemprop='jobTitle']").text)
-            except Exception:
-                user_type.append(None)
-            user_msg.append(article.find_element("xpath", ".//div[@class='bbWrapper']").text)
-            try:
-                user_msg_count.append(article.find_elements("xpath", ".//dl[@class='pairs pairs--justified']//child::dd")[1].text)
-            except IndexError:
-                user_msg_count.append(None)
+    driver.get(forum_link)
+    forum_type = driver.find_element("xpath", ".//h1[@class='p-title-value']").text.replace(" ", "_")
+    print(f"Forum: {forum_type}")
+    # Returns max page number of forum
+    max_page_label = driver.find_elements("xpath", "//li[contains(@class,'pageNav-page')]")[-1]
+    forum_max_page = max_page_label.find_element("xpath", ".//a[@href]").text
 
+    for page_num in range(1, int(2), 1):
+        page_num = f"page-{page_num}"
+        driver.get(forum_link + page_num)
+        # Returns all links of the page in a list called links
+        thread_container = driver.find_element("xpath", "//div[@class='structItemContainer-group js-threadList']")
+        titles = thread_container.find_elements("xpath", ".//div[contains(@class, 'structItem-title')]")
+        links = []
+        for title in titles:
+            link = title.find_element("xpath", ".//a[contains(@href, 'thread')]")
+            links.append(link.get_attribute("href"))
+            # driver.execute_script("arguments[0].click();", link)
+            # time.sleep(15)
 
+        # Opens each link and extracts data
+        for link in links:
+            driver.get(link)
+            articles = driver.find_elements("xpath", ".//article[@class='message message--post js-post js-inlineModContainer  ']")
+            for article in articles:
+                try:
+                    users.append(article.find_element("xpath", ".//span[@class='username ' and @itemprop='name']").text)
+                except Exception:
+                    users.append(None)
+                try:
+                    user_type.append(article.find_element("xpath", ".//h5[@itemprop='jobTitle']").text)
+                except Exception:
+                    user_type.append(None)
+                user_msg.append(article.find_element("xpath", ".//div[@class='bbWrapper']").text)
+                try:
+                    user_msg_count.append(article.find_elements("xpath", ".//dl[@class='pairs pairs--justified']//child::dd")[1].text)
+                except IndexError:
+                    user_msg_count.append(None)
+                try:
+                    forum_types.append(forum_type)
+                except Exception:
+                    forum_types.append(None)
+            time.sleep(0.25)
+        print(page_num)
 
-        time.sleep(0.5w)
-    print(page_num)
-
-data = {"user_name": users, "user_type": user_type, "user_msg": user_msg, "user_msg_count": user_msg_count}
+data = {"user_name": users, "user_type": user_type, "user_msg": user_msg, "user_msg_count": user_msg_count, "forum_type": forum_types}
 df = pd.DataFrame(data=data)
-df.to_excel("output.xlsx")
+df.to_csv("/result/mental_health_forum_data.csv")
+
+print("Job Finished")
 
 
 # print(link.get_attribute("href"))
