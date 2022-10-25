@@ -40,16 +40,19 @@ print(len(forums))
 forum_links = [forum.find_element("xpath", ".//a[contains(@data-shortcut,'node-description')]").get_attribute("href") for forum in forums]
 
 
-for forum_link in forum_links[:3]:
+for forum_link in forum_links:
 
     driver.get(forum_link)
     forum_type = driver.find_element("xpath", ".//h1[@class='p-title-value']").text.replace(" ", "_")
     print(f"Forum: {forum_type}")
     # Returns max page number of forum
     max_page_label = driver.find_elements("xpath", "//li[contains(@class,'pageNav-page')]")[-1]
-    forum_max_page = max_page_label.find_element("xpath", ".//a[@href]").text
+    forum_max_page = int(max_page_label.find_element("xpath", ".//a[@href]").text)
 
-    for page_num in range(1, int(2), 1):
+    if forum_max_page >= 50:
+        forum_max_page = 50
+
+    for page_num in range(1, forum_max_page, 1):
         page_num = f"page-{page_num}"
         driver.get(forum_link + page_num)
         # Returns all links of the page in a list called links
