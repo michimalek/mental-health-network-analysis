@@ -39,14 +39,13 @@ driver.get_screenshot_as_file("screen.png")
 
 try:
     forum_block = driver.find_element("xpath", "//div[@class='block block--category block--category401 collapsible-nodes']")
-    time.sleep(2)
     forums = forum_block.find_elements("xpath", ".//div[contains(@class,'node node')]")
 
     print(len(forums))
 
     forum_links = [forum.find_element("xpath", ".//a[contains(@data-shortcut,'node-description')]").get_attribute("href") for forum in forums]
 
-    for forum_link in forum_links[:2]:
+    for forum_link in forum_links:
 
         driver.get(forum_link)
         forum_type = driver.find_element("xpath", ".//h1[@class='p-title-value']").text.replace(" ", "_")
@@ -55,7 +54,7 @@ try:
         max_page_label = driver.find_elements("xpath", "//li[contains(@class,'pageNav-page')]")[-1]
         forum_max_page = int(max_page_label.find_element("xpath", ".//a[@href]").text)
 
-        max_page_allowed = 3
+        max_page_allowed = 50
         if forum_max_page >= max_page_allowed:
             forum_max_page = max_page_allowed
 
